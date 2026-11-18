@@ -302,6 +302,6 @@ document.getElementById("est").addEventListener("submit", e=>{
 quote();
 </script>
 <a id="backPill" href="../../" style="position:fixed;left:14px;bottom:14px;z-index:60;background:#0E1116;color:#fff;font:600 14px/1 system-ui,-apple-system,sans-serif;padding:10px 14px;border-radius:999px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25)">&larr; Back to portfolio</a>
-<script>if(window.self!==window.top){var b=document.getElementById("backPill");if(b)b.remove();}</script>
+<script>if(window.self!==window.top||location.search.indexOf("clean")>-1){var b=document.getElementById("backPill");if(b)b.remove();}</script>
 </body>
 </html>

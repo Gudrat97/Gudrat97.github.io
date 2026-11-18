@@ -257,7 +257,7 @@ function startRide(){
   }, 2000);
 }
 
-if(window.self !== window.top){ const b = document.getElementById("backPill"); if(b) b.remove(); }
+if(window.self !== window.top || location.search.indexOf("clean") > -1){ const b = document.getElementById("backPill"); if(b) b.remove(); }
 </script>
 </body>
 </html>
