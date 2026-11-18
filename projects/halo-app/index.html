@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halo Taxi app | Flutter demo</title>
+<meta name="description" content="Interactive demo of a Flutter taxi app for iOS and Android: phone sign-in, car classes with fixed fares and live driver tracking.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--y:#FFC914;--ink:#17140E;--paper:#FFFDF6;--line:#D9D3C2;--soft:#6B655A;--go:#0E7A4D;--bg:#0B1220;--bg2:#121B2E;--txt:#E7ECF5;--mut:#9AA6BD;--blue:#5B8CFF}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}
+button,input{font:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{width:min(1120px,100% - 40px);margin:0 auto;display:grid;grid-template-columns:1fr 400px;gap:64px;align-items:center;min-height:100vh;padding:48px 0}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;gap:40px}}
+.kind{color:var(--blue);font-weight:700;margin:0 0 12px}
+h1{font-size:clamp(2.2rem,4.6vw,3.4rem);line-height:1.05;margin:0;letter-spacing:-.03em;font-weight:800}
+.lede{color:var(--mut);font-size:1.12rem;max-width:52ch;margin:18px 0 26px}
+ul.feat{list-style:none;padding:0;margin:0 0 28px;display:grid;gap:10px}
+ul.feat li{padding-left:28px;position:relative}
+ul.feat li::before{content:"";position:absolute;left:0;top:.45em;width:14px;height:14px;border-radius:4px;background:rgba(91,140,255,.18);border:2px solid var(--blue)}
+.stack{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 28px;list-style:none}
+.stack li{background:var(--bg2);border:1px solid #24304A;border-radius:8px;padding:4px 11px;font-size:.9rem;font-weight:600}
+.links{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:12px;background:var(--blue);color:#fff}
+.btn.line{background:transparent;border:1.5px solid #34425F;color:var(--txt)}
+.btn:hover{filter:brightness(1.1)}
+.hint{color:var(--mut);font-size:.92rem;margin-top:16px}
+
+/* phone */
+.phone{width:380px;max-width:100%;margin:0 auto;aspect-ratio:9/19.3;background:#05070B;border-radius:54px;padding:14px;box-shadow:0 40px 80px -20px rgba(0,0,0,.6),inset 0 0 0 2px #2A3245}
+.screen{position:relative;height:100%;border-radius:42px;overflow:hidden;background:var(--paper);color:var(--ink)}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:30px;background:#05070B;border-radius:20px;z-index:20}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex}
+
+/* login */
+#login{background:var(--y);padding:78px 24px 28px}
+#login h2{font-size:1.7rem;line-height:1.1;margin:18px 0 8px;font-weight:800}
+#login p{margin:0 0 22px}
+.field{width:100%;padding:14px;border:2px solid var(--ink);border-radius:12px;background:#fff;font-size:1.05rem}
+.code{font-size:1.8rem;letter-spacing:.6em;text-align:center;font-weight:800}
+.go{margin-top:16px;width:100%;padding:15px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:700;cursor:pointer}
+.go:disabled{opacity:.45;cursor:not-allowed}
+.err{color:#9A1B1B;font-weight:600;min-height:1.4em;margin:10px 0 0;font-size:.9rem}
+
+/* map */
+.map{position:relative;flex:1;background:#EDEAE0;overflow:hidden}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.map svg.pin{inset:auto;left:50%;top:50%;width:30px;height:30px;transform:translate(-50%,-100%)}
+.car{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--y);border:2px solid var(--ink);display:grid;place-items:center;transition:left 1.8s ease-in-out,top 1.8s ease-in-out;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.car.sel{background:var(--ink)}
+.map .car svg{position:static;width:16px;height:16px}
+.badge{position:absolute;top:56px;left:14px;background:var(--y);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.85rem;z-index:5}
+.sheet{background:var(--paper);border-radius:22px 22px 0 0;padding:16px 14px 18px;box-shadow:0 -8px 24px rgba(0,0,0,.12);margin-top:-22px;position:relative;z-index:4}
+.sheet .field{padding:11px 12px;font-size:.95rem;border-width:1.5px;border-color:var(--line);margin-bottom:8px}
+.classes{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;scrollbar-width:none}
+.cls{flex:0 0 96px;border:2px solid var(--ink);border-radius:14px;background:#fff;padding:9px;text-align:left;cursor:pointer;color:var(--ink)}
+.cls b{display:block;font-size:.85rem}
+.cls span{font-weight:800;font-size:1.05rem}
+.cls[aria-pressed=true]{background:var(--ink);color:var(--y)}
+.small{font-size:.8rem;color:var(--soft);text-align:center;margin:8px 0 0}
+
+/* tracking */
+.bar{background:var(--y);padding:52px 16px 12px;font-weight:800;font-size:1.15rem}
+.panel{padding:16px 14px 18px;background:var(--paper)}
+.driver{display:flex;gap:12px;align-items:center}
+.ava{width:46px;height:46px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-weight:800;font-size:1.2rem}
+.driver .who{flex:1;font-size:.88rem}
+.driver .who b{display:block;font-size:.98rem}
+.plate{border:2px solid var(--ink);border-radius:6px;padding:4px 8px;font-weight:800;letter-spacing:.06em;background:#fff;font-size:.85rem}
+.eta{color:var(--go);font-weight:700;font-size:.85rem;text-align:right;margin-top:4px}
+.trip{display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:14px 0;background:#fff;font-size:.88rem}
+.trip b{font-size:1.05rem;white-space:nowrap}
+.cancel{width:100%;padding:13px;border:2px solid var(--ink);background:transparent;border-radius:14px;font-weight:700;cursor:pointer;color:var(--ink)}
+.spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}.car{transition:none}}
+.back{position:fixed;left:14px;bottom:14px;background:#fff;color:#0B1220;font-weight:700;font-size:14px;padding:10px 14px;border-radius:999px;text-decoration:none;z-index:50}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <p class="kind">Mobile app &middot; iOS and Android</p>
+    <h1>Halo Taxi, a ride-hailing app in Flutter</h1>
+    <p class="lede">Customers pick a car class, see the fixed fare before they order and follow the driver on the map. One code base runs on both iPhone and Android. Try it on the phone: any 4-digit code signs you in.</p>
+    <ul class="feat">
+      <li>Phone sign-in with a code from the dispatcher, no SMS costs at launch</li>
+      <li>Five car classes, each with its own tariff and an up-front fare</li>
+      <li>Live status, arrival time, driver, car and plate</li>
+      <li>Clean architecture: screens, state and API layer kept apart</li>
+    </ul>
+    <ul class="stack"><li>Flutter</li><li>Dart</li><li>iOS</li><li>Android</li><li>REST API</li></ul>
+    <div class="links">
+      <a class="btn" href="https://github.com/Gudrat97/halo-taxi-app" target="_blank" rel="noopener">View the Flutter code</a>
+      <a class="btn line" href="../../">Back to portfolio</a>
+    </div>
+    <p class="hint">This browser version mirrors the app's screens so you can try the flow without installing anything.</p>
+  </div>
+
+  <div class="phone" aria-label="Interactive app preview">
+    <div class="screen">
+      <div class="notch"></div>
+
+      <section class="view on" id="login" aria-label="Sign in">
+        <svg width="52" height="52" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17140E" d="M18.9 6c-.2-.6-.8-1-1.4-1H15V3H9v2H6.5c-.7 0-1.2.4-1.4 1L3 12v8c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-1h12v1c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-8zM6.5 16c-.8 0-1.5-.7-1.5-1.5S5.7 13 6.5 13s1.5.7 1.5 1.5S7.3 16 6.5 16m11 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5M5 11l1.5-4.5h11L19 11z"/></svg>
+        <h2 id="lTitle">Sign in with your phone</h2>
+        <p id="lText">We use your number so the driver can reach you.</p>
+        <input class="field" id="phone" type="tel" value="+993 65 " aria-label="Phone number">
+        <input class="field code" id="code" inputmode="numeric" maxlength="4" aria-label="4-digit code" hidden>
+        <p class="err" id="lErr" role="alert"></p>
+        <button class="go" id="lGo">Get a code</button>
+      </section>
+
+      <section class="view" id="home" aria-label="Order a ride">
+        <div class="map" id="map1"><span class="badge" id="nearby">0 cars nearby</span></div>
+        <div class="sheet">
+          <input class="field" id="from" placeholder="Where are you?" aria-label="Pick-up">
+          <input class="field" id="to" placeholder="Where to?" aria-label="Drop-off">
+          <div class="classes" id="classes" role="group" aria-label="Car class"></div>
+          <button class="go" id="order" disabled>Order</button>
+          <p class="small">Fixed price, paid in cash to the driver</p>
+        </div>
+      </section>
+
+      <section class="view" id="track" aria-label="Your ride">
+        <div class="bar" id="status">Looking for a car</div>
+        <div class="map" id="map2"></div>
+        <div class="panel" id="panel"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<a class="back" id="backPill" href="../../">&larr; Back to portfolio</a>
+
+<script>
+const CLASSES = [
+  {id:"economy", label:"Economy", base:8, km:1.6, min:12, served:["economy","comfort","vip"]},
+  {id:"comfort", label:"Comfort", base:12, km:2.2, min:18, served:["comfort","vip"]},
+  {id:"vip", label:"VIP", base:25, km:3.5, min:35, served:["vip"]},
+  {id:"minivan", label:"Minivan", base:18, km:2.8, min:25, served:["minivan"]},
+  {id:"courier", label:"Courier", base:10, km:1.4, min:12, served:["courier","economy"]}
+];
+const DRIVERS = [
+  {id:1, name:"Merdan A.", phone:"+993 65 123456", car:"White Toyota Camry, 2021", plate:"AG 4521", rating:4.9, cls:"comfort", x:.32, y:.38},
+  {id:2, name:"Bahar S.", phone:"+993 61 234567", car:"Silver Hyundai Elantra, 2019", plate:"AG 7310", rating:4.8, cls:"economy", x:.62, y:.30},
+  {id:3, name:"Dowlet K.", phone:"+993 62 345678", car:"Black Lexus ES 350, 2023", plate:"AG 0007", rating:5.0, cls:"vip", x:.74, y:.58},
+  {id:4, name:"Aman R.", phone:"+993 63 456789", car:"Grey Toyota Sienna, 2020", plate:"AG 2288", rating:4.7, cls:"minivan", x:.22, y:.64},
+  {id:5, name:"Serdar M.", phone:"+993 64 567890", car:"Blue Kia Rio, 2018", plate:"AG 5174", rating:4.6, cls:"economy", x:.48, y:.72},
+  {id:6, name:"Jeren B.", phone:"+993 65 678901", car:"White Chevrolet Damas, 2022", plate:"AG 9031", rating:4.8, cls:"courier", x:.56, y:.46}
+];
+const KM = 6.4;
+const fare = c => Math.round(Math.max(c.min, c.base + c.km * KM));
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let cls = CLASSES[0], timer = null, codeStep = false;
+
+const CAR = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M18.9 6c-.2-.6-.8-1-1.4-1h-11c-.7 0-1.2.4-1.4 1L3 12v8c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-1h12v1c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-8zM6.5 16a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m11 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3M5 11l1.5-4.5h11L19 11z"/></svg>';
+const STREETS = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+  <rect x="8" y="10" width="22" height="18" rx="2" fill="#CFE3C4"/><rect x="66" y="70" width="26" height="20" rx="2" fill="#CFE3C4"/>
+  <g stroke="#fff" stroke-width="2.4" stroke-linecap="round">
+  <line x1="18" y1="0" x2="18" y2="100"/><line x1="42" y1="0" x2="42" y2="100"/><line x1="66" y1="0" x2="66" y2="100"/><line x1="88" y1="0" x2="88" y2="100"/>
+  <line x1="0" y1="20" x2="100" y2="20"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="80" x2="100" y2="80"/></g>
+  <line x1="0" y1="95" x2="100" y2="35" stroke="#fff" stroke-width="3.4"/></svg>
+  <svg class="pin" viewBox="0 0 24 24"><path fill="#17140E" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7m0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5"/></svg>`;
+
+function show(id){ document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === id)); }
+
+function drawMap(el, drivers, selected){
+  el.querySelectorAll(".car").forEach(c => c.remove());
+  if(!el.querySelector("svg")) el.insertAdjacentHTML("beforeend", STREETS);
+  drivers.forEach(d => {
+    const m = document.createElement("div");
+    m.className = "car" + (selected && d.id === selected.id ? " sel" : "");
+    m.style.left = d.x * 100 + "%"; m.style.top = d.y * 100 + "%";
+    m.style.color = selected && d.id === selected.id ? "#FFC914" : "#17140E";
+    m.dataset.id = d.id; m.innerHTML = CAR;
+    el.append(m);
+  });
+}
+
+// ---- login ----
+$("lGo").onclick = () => {
+  $("lErr").textContent = "";
+  if(!codeStep){
+    if($("phone").value.replace(/\D/g, "").length < 8){ $("lErr").textContent = "Enter your full phone number."; return; }
+    codeStep = true;
+    $("lTitle").textContent = "Enter your code";
+    $("lText").textContent = "Our dispatcher will call " + $("phone").value + " and tell you a 4-digit code.";
+    $("phone").hidden = true; $("code").hidden = false; $("code").focus();
+    $("lGo").textContent = "Sign in";
+  } else {
+    if(!/^\d{4}$/.test($("code").value)){ $("lErr").textContent = "The code has 4 digits. Check it and try again."; return; }
+    show("home"); renderHome();
+  }
+};
+$("code").oninput = e => e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4);
+
+// ---- home ----
+function renderHome(){
+  $("classes").innerHTML = CLASSES.map(c => `<button class="cls" data-id="${c.id}" aria-pressed="${c === cls}"><b>${c.label}</b><span>${fare(c)} TMT</span></button>`).join("");
+  const list = DRIVERS.filter(d => cls.served.includes(d.cls));
+  $("nearby").textContent = list.length + (list.length === 1 ? " car nearby" : " cars nearby");
+  drawMap($("map1"), list);
+  updateOrder();
+}
+function updateOrder(){
+  const ok = $("from").value.trim() && $("to").value.trim();
+  $("order").disabled = !ok;
+  $("order").textContent = ok ? `Order ${cls.label} for ${fare(cls)} TMT` : "Enter pick-up and drop-off";
+}
+$("classes").onclick = e => { const b = e.target.closest(".cls"); if(!b) return; cls = CLASSES.find(c => c.id === b.dataset.id); renderHome(); };
+$("from").oninput = updateOrder; $("to").oninput = updateOrder;
+$("order").onclick = startRide;
+
+// ---- tracking: searching → accepted → arrived → on trip → done ----
+function startRide(){
+  show("track");
+  const from = $("from").value.trim(), to = $("to").value.trim(), price = fare(cls);
+  const driver = {...DRIVERS.find(d => cls.served.includes(d.cls))};
+  let state = "searching", eta = 4, tick = 0;
+  const trip = `<div class="trip"><div>${esc(from)}<br><span style="color:#6B655A">to ${esc(to)}</span></div><b>${price} TMT</b></div>`;
+  const cancelBtn = `<button class="cancel" id="cancel">Cancel ride</button>`;
+
+  function render(){
+    const titles = {searching:"Looking for a car", accepted:"Driver is on the way", arrived:"Your car is outside", trip:"On the way", done:"Ride finished", cancelled:"Ride cancelled"};
+    $("status").textContent = titles[state];
+    let html = "";
+    if(state === "searching") html = `<div class="driver"><div class="spin"></div><div class="who">Sending your order to the nearest drivers…</div></div>` + trip + cancelBtn;
+    else if(state === "done" || state === "cancelled") html = `<div class="driver"><div class="who"><b>${state === "done" ? "You arrived. Please pay " + price + " TMT in cash." : "Your ride was cancelled. You were not charged."}</b></div></div>` + trip + `<button class="go" id="again">Book another ride</button>`;
+    else html = `<div class="driver"><div class="ava">${driver.name[0]}</div><div class="who"><b>${driver.name} &#9733; ${driver.rating.toFixed(1)}</b>${driver.car}<br><span style="color:#6B655A">${driver.phone}</span></div><div><span class="plate">${driver.plate}</span>${state === "accepted" ? `<div class="eta">${eta} min away</div>` : ""}</div></div>` + trip + (state === "accepted" ? cancelBtn : "");
+    $("panel").innerHTML = html;
+    if($("cancel")) $("cancel").onclick = () => { clearInterval(timer); state = "cancelled"; render(); };
+    if($("again")) $("again").onclick = () => { clearInterval(timer); show("home"); renderHome(); };
+    drawMap($("map2"), state === "searching" ? DRIVERS.filter(d => cls.served.includes(d.cls)) : [driver], state === "searching" ? null : driver);
+  }
+
+  render();
+  clearInterval(timer);
+  timer = setInterval(() => {
+    tick++;
+    if(state === "searching" && tick >= 2){ state = "accepted"; }
+    else if(state === "accepted"){
+      driver.x += (.5 - driver.x) * .4; driver.y += (.5 - driver.y) * .4; eta = Math.max(1, eta - 1);
+      if(Math.hypot(.5 - driver.x, .5 - driver.y) < .04){ driver.x = .5; driver.y = .5; state = "arrived"; }
+      const car = $("map2").querySelector(".car");
+      if(car && state === "accepted"){ car.style.left = driver.x * 100 + "%"; car.style.top = driver.y * 100 + "%"; const e = $("panel").querySelector(".eta"); if(e) e.textContent = eta + " min away"; return; }
+    }
+    else if(state === "arrived" && tick % 2 === 0){ state = "trip"; }
+    else if(state === "trip" && tick % 3 === 0){ state = "done"; clearInterval(timer); }
+    else return;
+    render();
+  }, 2000);
+}
+
+if(window.self !== window.top){ const b = document.getElementById("backPill"); if(b) b.remove(); }
+</script>
+</body>
+</html>
