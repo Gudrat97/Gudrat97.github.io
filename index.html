@@ -49,7 +49,11 @@ section{padding:96px 0 0}
 .hero{padding:76px 0 0}
 .status{display:inline-flex;align-items:center;gap:9px;font-weight:500;color:var(--soft);margin-bottom:22px}
 .status b{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(20,128,74,.15)}
-.hero h1{font-size:clamp(2.4rem,6.4vw,5rem);max-width:15ch}
+.hero h1{font-size:clamp(2.3rem,5vw,4.2rem);max-width:15ch}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero-shot{transform:rotate(1.5deg)}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-shot{transform:none}}
+@media (prefers-reduced-motion:reduce){.hero-shot{transform:none}}
 .hero .lede{font-size:1.2rem;color:var(--soft);max-width:50ch;margin:24px 0 32px}
 .cta{display:flex;flex-wrap:wrap;gap:12px}
 .facts{display:grid;grid-template-columns:repeat(4,1fr);margin-top:64px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
@@ -75,9 +79,9 @@ section{padding:96px 0 0}
 .case .kind{color:var(--blue);font-weight:600;margin:0 0 10px}
 .case h3{font-size:clamp(1.5rem,2.6vw,2rem)}
 .case p.what{color:var(--soft);margin:14px 0 18px}
-.case ul{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:8px}
-.case li{padding-left:26px;position:relative}
-.case li::before{content:"";position:absolute;left:0;top:.55em;width:12px;height:12px;border-radius:3px;background:var(--blue-pale);border:2px solid var(--blue)}
+.case ul.feat{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:8px}
+.case ul.feat li{padding-left:26px;position:relative}
+.case ul.feat li::before{content:"";position:absolute;left:0;top:.55em;width:12px;height:12px;border-radius:3px;background:var(--blue-pale);border:2px solid var(--blue)}
 .stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;padding:0;list-style:none}
 .stack li{font-size:.85rem;font-weight:500;background:#EEEFEA;border-radius:6px;padding:3px 9px}
 .links{display:flex;gap:10px;flex-wrap:wrap}
@@ -156,12 +160,20 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 <main id="top">
 <section class="hero">
   <div class="wrap">
-    <p class="status"><b></b>Available for new projects</p>
-    <h1>Websites and web apps for small businesses</h1>
-    <p class="lede">I design and build landing pages, online stores, booking systems and admin dashboards. You get a fixed price, a clear deadline and a working preview link from the first days.</p>
-    <div class="cta">
-      <a class="btn" href="#work">See my work</a>
-      <a class="btn line" href="#contact">Discuss your project</a>
+    <div class="hero-grid">
+      <div>
+        <p class="status"><b></b>Available for new projects</p>
+        <h1>Websites and web apps for small businesses</h1>
+        <p class="lede">I design and build landing pages, online stores, booking systems and admin dashboards. You get a fixed price, a clear deadline and a working preview link from the first days.</p>
+        <div class="cta">
+          <a class="btn" href="#work">See my work</a>
+          <a class="btn line" href="#contact">Discuss your project</a>
+        </div>
+      </div>
+      <a class="window hero-shot" href="projects/loam-store/" aria-label="Open the Loam Tableware store demo">
+        <div class="bar"><i></i><i></i><i></i><span>loam-store</span></div>
+        <div class="view"><iframe data-src="projects/loam-store/" title="Preview of the Loam Tableware store" tabindex="-1" aria-hidden="true" scrolling="no"></iframe></div>
+      </a>
     </div>
     <div class="facts">
       <div><b>Fixed price</b><span>Agreed before work starts</span></div>
@@ -187,7 +199,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
           <p class="kind">Landing page</p>
           <h3>Halo Rides, a city taxi service</h3>
           <p class="what">A landing page that turns visitors into bookings. The fare is shown before the customer calls, which removes the most common question dispatchers get.</p>
-          <ul>
+          <ul class="feat">
             <li>Fare calculator by district and car class</li>
             <li>Car classes, how-it-works and FAQ sections</li>
             <li>Driver recruitment block</li>
@@ -206,7 +218,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
           <p class="kind">Online store</p>
           <h3>Loam Tableware, a ceramics shop</h3>
           <p class="what">A storefront with the parts that make people buy: quick filters, a product page, and a cart that nudges the order up to free shipping.</p>
-          <ul>
+          <ul class="feat">
             <li>Category filters, search and sorting</li>
             <li>Product view with quantity picker</li>
             <li>Cart saved between visits, free-shipping progress</li>
@@ -225,7 +237,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
           <p class="kind">Booking system</p>
           <h3>Northside Barbers, online appointments</h3>
           <p class="what">Customers book a chair in four steps instead of calling. Closed days and taken times are blocked, so the shop never gets a double booking.</p>
-          <ul>
+          <ul class="feat">
             <li>Service, barber, day and time in one flow</li>
             <li>Live summary with the total price</li>
             <li>Form checks with clear error messages</li>
@@ -244,7 +256,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
           <p class="kind">Admin dashboard</p>
           <h3>Relay, a courier fleet dashboard</h3>
           <p class="what">One screen where a dispatcher sees revenue, delivery speed and every courier's status, and can compare any period with the one before.</p>
-          <ul>
+          <ul class="feat">
             <li>Key figures with change against the last period</li>
             <li>Interactive revenue chart, no chart library</li>
             <li>Courier table with sorting, search and filters</li>
