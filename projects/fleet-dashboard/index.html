@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay | Courier fleet dashboard</title>
+<meta name="description" content="Demo admin dashboard for a courier fleet: KPIs, revenue chart, deliveries by zone and a sortable courier table.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5FA; --side:#1A2342; --side-ink:#AEB8D6; --card:#FFFFFF; --ink:#131A2C; --muted:#636E88; --rule:#DFE4EE;
+  --series:#3355D1; --series-soft:#E3E9FB;
+  --good:#16794A; --warn:#A8610A; --bad:#B3261E; --idle:#6B7385;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;color:var(--ink);background:var(--bg);font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--series);outline-offset:2px;border-radius:4px}
+h1,h2{margin:0;font-weight:700;letter-spacing:-.01em}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+
+.side{background:var(--side);color:var(--side-ink);padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.brand{color:#fff;font-weight:700;font-size:1.3rem;padding:0 10px 18px;display:flex;align-items:center;gap:10px}
+.brand i{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#fff 0 50%,#7E97F2 50%);display:block}
+.side a{color:inherit;text-decoration:none;padding:10px 12px;border-radius:8px;font-weight:500;display:flex;justify-content:space-between}
+.side a:hover{background:rgba(255,255,255,.07);color:#fff}
+.side a[aria-current]{background:#fff;color:var(--side)}
+.side a b{background:rgba(255,255,255,.14);border-radius:999px;padding:0 8px;font-weight:600;font-size:.85rem}
+.side .who{margin-top:auto;padding:14px 10px 0;border-top:1px solid rgba(255,255,255,.12);font-size:.9rem}
+.side .who strong{display:block;color:#fff}
+
+main{padding:26px 30px 48px;min-width:0}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;margin-bottom:22px}
+.head h1{font-size:1.75rem}
+.head p{margin:4px 0 0;color:var(--muted)}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:7px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--side);color:#fff}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--rule);border-radius:14px;margin-bottom:18px}
+.kpi{padding:18px 20px;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:0}
+.kpi span{color:var(--muted);font-weight:500}
+.kpi strong{display:block;font-size:1.9rem;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px}
+.delta{font-size:.9rem;font-weight:600}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)}
+.delta small{color:var(--muted);font-weight:400;font-size:1em}
+
+.row{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-bottom:18px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:20px;min-width:0}
+.panel h2{font-size:1.05rem}
+.panel .sub{color:var(--muted);margin:2px 0 14px}
+.chart{position:relative}
+.chart svg{width:100%;height:260px;display:block;overflow:visible}
+.tip{position:absolute;top:0;left:0;background:var(--ink);color:#fff;padding:7px 10px;border-radius:8px;font-size:.88rem;pointer-events:none;white-space:nowrap;opacity:0;transform:translate(-50%,-115%)}
+.tip b{display:block;font-size:1rem}
+.zones{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.zones li{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center}
+.zones .track{height:14px;background:var(--series-soft);border-radius:0 4px 4px 0}
+.zones .fill{height:100%;background:var(--series);border-radius:0 4px 4px 0;min-width:2px}
+.zones li:hover .fill{background:#2340A8}
+.zones b{text-align:right;font-weight:600}
+
+.table-head{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters input,.filters select{padding:8px 11px;border:1px solid var(--rule);border-radius:8px;background:#fff}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:.9rem}
+th button{border:0;background:none;font-weight:600;color:inherit;padding:0}
+th button::after{content:" \2195";opacity:.45}
+th[aria-sort=ascending] button::after{content:" \2191";opacity:1}
+th[aria-sort=descending] button::after{content:" \2193";opacity:1}
+td.num,th.num{text-align:right}
+tbody tr:hover{background:#F7F9FD}
+.status{display:inline-flex;align-items:center;gap:7px;font-weight:500}
+.status i{width:9px;height:9px;border-radius:50%;background:currentColor}
+.s-delivering{color:var(--series)} .s-available{color:var(--good)} .s-delayed{color:var(--bad)} .s-offline{color:var(--idle)}
+.status span{color:var(--ink)}
+.none{padding:28px 10px;color:var(--muted);text-align:center}
+.credit{margin-top:22px;color:var(--muted);font-size:.9rem}
+.credit a{color:var(--ink)}
+
+@media (max-width:1000px){.row{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(2){border-right:0}.kpi:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{flex-direction:row;align-items:center;overflow-x:auto;padding:10px 12px}
+  .brand{padding:0 10px 0 4px}.side .who{display:none}.side a{white-space:nowrap;gap:8px}
+  main{padding:18px 14px 40px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side" aria-label="Sections">
+    <div class="brand"><i></i>Relay</div>
+    <a href="#" aria-current="page">Overview</a>
+    <a href="#">Orders <b>18</b></a>
+    <a href="#">Couriers</a>
+    <a href="#">Zones</a>
+    <a href="#">Payouts</a>
+    <a href="#">Settings</a>
+    <div class="who"><strong>Dispatch desk</strong>Day shift, 08:00 to 20:00</div>
+  </nav>
+
+  <main>
+    <div class="head">
+      <div>
+        <h1>Fleet overview</h1>
+        <p id="period"></p>
+      </div>
+      <div class="seg" role="group" aria-label="Date range">
+        <button data-days="7" aria-pressed="false">7 days</button>
+        <button data-days="30" aria-pressed="true">30 days</button>
+        <button data-days="90" aria-pressed="false">90 days</button>
+      </div>
+    </div>
+
+    <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+    <div class="row">
+      <section class="panel">
+        <h2>Revenue per day</h2>
+        <p class="sub" id="revSub"></p>
+        <div class="chart" id="chart">
+          <svg id="line" role="img" aria-label="Line chart of daily revenue for the selected period"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Deliveries by zone</h2>
+        <p class="sub">Completed orders in the selected period</p>
+        <ul class="zones" id="zones"></ul>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="table-head">
+        <h2>Couriers</h2>
+        <div class="filters">
+          <input id="find" type="search" placeholder="Find a courier" aria-label="Find a courier">
+          <select id="statusFilter" aria-label="Filter by status">
+            <option value="">All statuses</option>
+            <option>Delivering</option><option>Available</option><option>Delayed</option><option>Offline</option>
+          </select>
+        </div>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr>
+            <th data-k="name"><button>Courier</button></th>
+            <th data-k="vehicle"><button>Vehicle</button></th>
+            <th data-k="status"><button>Status</button></th>
+            <th data-k="done" class="num"><button>Deliveries</button></th>
+            <th data-k="ontime" class="num"><button>On time</button></th>
+            <th data-k="rating" class="num"><button>Rating</button></th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="credit">Relay is a fictional product and all figures are generated sample data. Design and code by <a href="https://gudrat97.github.io">Gudrat</a>.</p>
+  </main>
+</div>
+
+<script>
+// ---------- sample data (seeded so it is the same on every load) ----------
+let seed = 42;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const DAYS = 180, today = new Date(2026, 10, 15);
+const daily = Array.from({length:DAYS}, (_, i) => {
+  const d = new Date(today); d.setDate(d.getDate() - (DAYS - 1 - i));
+  const weekend = d.getDay() === 0 || d.getDay() === 6;
+  const trend = 190 + i * .55;
+  const orders = Math.round(trend * (weekend ? .72 : 1) * (.88 + rnd() * .24));
+  return {date:d, orders, revenue: Math.round(orders * (6.4 + rnd() * 1.2)), ontime: .9 + rnd() * .07, mins: 27 + rnd() * 6};
+});
+const zoneShare = [["Centre",.27],["Riverside",.2],["North Market",.17],["University",.14],["Business Park",.13],["Airport",.09]];
+const couriers = [
+  ["Aylin Demir","Scooter","Delivering"],["Marco Rossi","Car","Available"],["Jonas Weber","Bicycle","Delivering"],
+  ["Sofia Lind","Scooter","Delayed"],["Daniel Okoro","Car","Delivering"],["Mira Tanaka","Bicycle","Available"],
+  ["Lucas Moreau","Van","Offline"],["Elena Petrova","Scooter","Delivering"],["Tom Hughes","Car","Available"],
+  ["Nadia Rahman","Bicycle","Offline"],["Pavel Novak","Van","Delivering"],["Clara Jensen","Scooter","Delayed"]
+].map(([name, vehicle, status]) => ({name, vehicle, status, share:.05 + rnd() * .07, ontime: Math.round(88 + rnd() * 11), rating: +(4.3 + rnd() * .7).toFixed(1)}));
+
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("en-US");
+const usd = n => "$" + fmt(Math.round(n));
+const dayLabel = d => d.toLocaleDateString("en-US", {month:"short", day:"numeric"});
+let range = 30, sortKey = "done", sortDir = -1;
+
+function totals(list){
+  const orders = list.reduce((s,d)=>s+d.orders,0);
+  return {orders, revenue: list.reduce((s,d)=>s+d.revenue,0),
+    ontime: list.reduce((s,d)=>s+d.ontime*d.orders,0)/orders*100,
+    mins: list.reduce((s,d)=>s+d.mins*d.orders,0)/orders};
+}
+
+function render(){
+  const cur = daily.slice(-range), prev = daily.slice(-range*2, -range);
+  const a = totals(cur), b = totals(prev);
+  $("period").textContent = dayLabel(cur[0].date) + " to " + dayLabel(cur[cur.length-1].date) + ", compared with the " + range + " days before";
+
+  // KPI tiles. For delivery time a lower number is the good direction.
+  const tile = (label, value, now, before, lowerIsBetter, unit) => {
+    const diff = unit === "pts" ? now - before : (now - before) / before * 100;
+    const good = lowerIsBetter ? diff < 0 : diff > 0;
+    const txt = (diff > 0 ? "+" : "−") + Math.abs(diff).toFixed(1) + (unit === "pts" ? " pts" : "%");
+    return `<div class="kpi"><span>${label}</span><strong>${value}</strong><span class="delta ${good ? "up" : "down"}">${diff > 0 ? "▲" : "▼"} ${txt} <small>vs previous</small></span></div>`;
+  };
+  $("kpis").innerHTML =
+    tile("Deliveries", fmt(a.orders), a.orders, b.orders) +
+    tile("Revenue", usd(a.revenue), a.revenue, b.revenue) +
+    tile("On time", a.ontime.toFixed(1) + "%", a.ontime, b.ontime, false, "pts") +
+    tile("Average delivery", a.mins.toFixed(1) + " min", a.mins, b.mins, true);
+
+  $("revSub").textContent = "Average " + usd(a.revenue / range) + " a day";
+  drawLine(cur);
+
+  const zones = zoneShare.map(([n, s]) => [n, Math.round(a.orders * s)]);
+  const max = zones[0][1];
+  $("zones").innerHTML = zones.map(([n, v]) =>
+    `<li title="${n}: ${fmt(v)} deliveries"><span>${n}</span><div class="track"><div class="fill" style="width:${v / max * 100}%"></div></div><b>${fmt(v)}</b></li>`).join("");
+
+  couriers.forEach(c => c.done = Math.round(a.orders * c.share));
+  renderRows();
+}
+
+// ---------- line chart ----------
+let pts = [];
+function drawLine(list){
+  const svg = $("line"), W = svg.clientWidth || 640, H = 260, m = {t:10, r:10, b:26, l:46};
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const top = Math.ceil(Math.max(...list.map(d=>d.revenue)) / 1000) * 1000;
+  const x = i => m.l + i / (list.length - 1) * (W - m.l - m.r);
+  const y = v => H - m.b - v / top * (H - m.t - m.b);
+  pts = list.map((d, i) => ({x:x(i), y:y(d.revenue), d}));
+  let g = "";
+  for(let v = 0; v <= top; v += 500){
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="#DFE4EE" stroke-width="1"/>` +
+         `<text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#636E88">${v >= 1000 ? "$" + v / 1000 + "k" : "$" + v}</text>`;
+  }
+  const step = Math.ceil(list.length / (W < 480 ? 4 : 6));
+  list.forEach((d, i) => { if(i % step === 0 && i < list.length - step / 2) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : "middle"}" font-size="12" fill="#636E88">${dayLabel(d.date)}</text>`; });
+  const path = pts.map((p, i) => (i ? "L" : "M") + p.x.toFixed(1) + " " + p.y.toFixed(1)).join("");
+  const last = pts[pts.length - 1];
+  svg.innerHTML = g +
+    `<path d="${path}L${last.x} ${H - m.b}L${pts[0].x} ${H - m.b}Z" fill="#3355D1" opacity=".08"/>` +
+    `<path d="${path}" fill="none" stroke="#3355D1" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` +
+    `<line id="cross" y1="${m.t}" y2="${H - m.b}" stroke="#131A2C" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>` +
+    `<circle id="dot" r="5" fill="#3355D1" stroke="#fff" stroke-width="2" opacity="0"/>`;
+}
+function hover(e){
+  const box = $("line").getBoundingClientRect(), mx = e.clientX - box.left;
+  const p = pts.reduce((a, b) => Math.abs(b.x - mx) < Math.abs(a.x - mx) ? b : a);
+  const cross = $("cross"), dot = $("dot"), tip = $("tip");
+  cross.setAttribute("x1", p.x); cross.setAttribute("x2", p.x); cross.setAttribute("opacity", ".5");
+  dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y); dot.setAttribute("opacity", "1");
+  tip.innerHTML = `<b>${usd(p.d.revenue)}</b>${dayLabel(p.d.date)}, ${fmt(p.d.orders)} deliveries`;
+  tip.style.opacity = 1;
+  const half = tip.offsetWidth / 2;
+  tip.style.left = Math.min(box.width - half, Math.max(half, p.x)) + "px";
+  tip.style.top = Math.max(46, p.y) + "px";
+}
+$("chart").addEventListener("pointermove", hover);
+$("chart").addEventListener("pointerdown", hover);
+$("chart").addEventListener("pointerleave", () => { $("tip").style.opacity = 0; $("cross").setAttribute("opacity", 0); $("dot").setAttribute("opacity", 0); });
+
+// ---------- table ----------
+function renderRows(){
+  const q = $("find").value.trim().toLowerCase(), st = $("statusFilter").value;
+  const list = couriers.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!st || c.status === st))
+    .sort((a, b) => (typeof a[sortKey] === "string" ? a[sortKey].localeCompare(b[sortKey]) : a[sortKey] - b[sortKey]) * sortDir);
+  $("rows").innerHTML = list.length ? list.map(c => `<tr>
+    <td><strong>${c.name}</strong></td><td>${c.vehicle}</td>
+    <td><span class="status s-${c.status.toLowerCase()}"><i></i><span>${c.status}</span></span></td>
+    <td class="num">${fmt(c.done)}</td><td class="num">${c.ontime}%</td><td class="num">${c.rating.toFixed(1)}</td></tr>`).join("")
+    : `<tr><td colspan="6" class="none">No couriers match. Clear the search or choose another status.</td></tr>`;
+  document.querySelectorAll("th").forEach(th => th.setAttribute("aria-sort", th.dataset.k === sortKey ? (sortDir === 1 ? "ascending" : "descending") : "none"));
+}
+document.querySelectorAll("th button").forEach(b => b.onclick = () => {
+  const k = b.parentElement.dataset.k;
+  if(k === sortKey) sortDir *= -1; else { sortKey = k; sortDir = (k === "name" || k === "vehicle" || k === "status") ? 1 : -1; }
+  renderRows();
+});
+$("find").oninput = renderRows; $("statusFilter").onchange = renderRows;
+
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => {
+  range = +b.dataset.days;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(render, 150); });
+render();
+</script>
+<a href="../../" style="position:fixed;left:14px;bottom:14px;z-index:60;background:#0E1116;color:#fff;font:600 14px/1 system-ui,-apple-system,sans-serif;padding:10px 14px;border-radius:999px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25)">&larr; Back to portfolio</a>
+</body>
+</html>

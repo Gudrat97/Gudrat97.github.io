@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northside Barbers | Book a chair online</title>
+<meta name="description" content="Demo booking site for a barber shop: choose a service, a barber, a day and a time in four steps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1B3E93;--red:#D52738;--ink:#0F1522;--pale:#EDF0F7;--white:#fff;--muted:#586176;--rule:#CCD3E2;--ok:#157347;
+  --font:"Archivo","Arial Narrow",Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font);font-size:17px;line-height:1.5;color:var(--ink);background:var(--white)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+h1,h2,h3{margin:0;font-stretch:68%;font-weight:800;line-height:.98;letter-spacing:-.005em}
+h2{font-size:clamp(2.2rem,5vw,3.6rem)}
+.pole{height:14px;background:repeating-linear-gradient(-45deg,var(--red) 0 18px,var(--white) 18px 36px,var(--blue) 36px 54px,var(--white) 54px 72px)}
+
+header .wrap{display:flex;justify-content:space-between;align-items:center;height:70px;gap:16px}
+.logo{font-stretch:68%;font-weight:900;font-size:1.7rem;text-decoration:none;color:var(--blue)}
+header nav{display:flex;gap:24px;align-items:center}
+header nav a{color:var(--ink);text-decoration:none;font-weight:500}
+header nav a:hover{color:var(--red)}
+@media (max-width:640px){header nav a:not(.tel){display:none}}
+.tel{font-weight:700}
+
+.hero{background:var(--blue);color:var(--white);padding:48px 0 150px}
+.hero h1{font-size:clamp(3.2rem,10vw,7.5rem);max-width:11ch}
+.hero p{font-size:1.2rem;max-width:44ch;margin:22px 0 0;color:#D8E0F5}
+
+/* booking */
+.book{margin-top:-104px;position:relative}
+.sheet{background:var(--white);border:3px solid var(--ink);display:grid;grid-template-columns:1fr 300px}
+.flow{padding:28px;min-width:0}
+.progress{display:flex;list-style:none;margin:0 0 26px;padding:0;gap:6px}
+.progress li{flex:1;border-top:5px solid var(--rule);padding-top:8px;font-weight:600;color:var(--muted);font-size:.95rem}
+.progress li.done{border-color:var(--blue);color:var(--blue)}
+.progress li.now{border-color:var(--red);color:var(--ink)}
+@media (max-width:560px){.progress li span{display:none}}
+.flow h2{font-size:2rem;margin-bottom:18px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:1fr auto;gap:2px 16px;text-align:left;padding:14px 16px;border:2px solid var(--rule);background:var(--white);border-radius:0}
+.opt:hover{border-color:var(--ink)}
+.opt[aria-pressed=true]{border-color:var(--blue);background:var(--pale);box-shadow:inset 6px 0 0 var(--blue)}
+.opt b{font-size:1.1rem}
+.opt small{color:var(--muted);font-size:.95rem}
+.opt .p{grid-row:span 2;align-self:center;font-weight:800;font-size:1.3rem;font-stretch:75%}
+.two{grid-template-columns:1fr 1fr}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:18px}
+.day{flex:0 0 68px;padding:10px 0;border:2px solid var(--rule);background:var(--white);text-align:center}
+.day b{display:block;font-size:1.5rem;font-stretch:75%;line-height:1.1}
+.day small{font-size:.85rem;color:var(--muted)}
+.day[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:var(--white)}
+.day[aria-pressed=true] small{color:#D8E0F5}
+.day:disabled{opacity:.4;cursor:not-allowed}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.slot{padding:10px 0;border:2px solid var(--rule);background:var(--white);font-weight:600}
+.slot[aria-pressed=true]{background:var(--red);border-color:var(--red);color:var(--white)}
+.slot:disabled{text-decoration:line-through;color:#9aa3b7;background:var(--pale);cursor:not-allowed}
+.hint{color:var(--muted);font-size:.95rem;margin:12px 0 0}
+label.f{display:block;margin-bottom:16px;font-weight:600}
+label.f input{display:block;width:100%;margin-top:6px;padding:12px 14px;border:2px solid var(--rule);font-weight:400}
+label.f input[aria-invalid=true]{border-color:var(--red)}
+.err{color:var(--red);font-weight:500;font-size:.92rem;min-height:1.3em;display:block;margin-top:4px}
+.actions{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+.btn{border:3px solid var(--ink);background:var(--ink);color:var(--white);padding:12px 24px;font-weight:700;font-size:1.05rem}
+.btn:hover{background:var(--red);border-color:var(--red)}
+.btn:disabled{background:var(--rule);border-color:var(--rule);color:var(--muted);cursor:not-allowed}
+.btn.back{background:transparent;color:var(--ink)}
+.btn.back:hover{background:var(--pale);border-color:var(--ink)}
+.summary{background:var(--pale);border-left:3px solid var(--ink);padding:28px 24px}
+.summary h3{font-size:1.5rem;margin-bottom:14px}
+.summary dl{margin:0}
+.summary dt{color:var(--muted);font-size:.9rem;margin-top:12px}
+.summary dd{margin:0;font-weight:600}
+.summary .sum{border-top:2px solid var(--ink);margin-top:18px;padding-top:12px;display:flex;justify-content:space-between;font-weight:800;font-size:1.4rem;font-stretch:75%}
+@media (max-width:860px){.sheet{grid-template-columns:1fr}.summary{border-left:0;border-top:3px solid var(--ink)}}
+.confirm{text-align:left}
+.confirm .tick{width:56px;height:56px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:1.8rem;margin-bottom:16px}
+.confirm p{max-width:52ch}
+
+.band{padding:84px 0}
+.prices{display:grid;grid-template-columns:1fr 1fr;gap:0 56px;margin-top:32px}
+.prices div{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:2px solid var(--rule)}
+.prices span small{display:block;color:var(--muted);font-size:.92rem}
+.prices b{font-size:1.2rem;font-stretch:75%;font-weight:800}
+@media (max-width:700px){.prices{grid-template-columns:1fr}}
+.visit{background:var(--ink);color:var(--white)}
+.visit .wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.visit table{border-collapse:collapse;width:100%;margin-top:24px}
+.visit td{padding:9px 0;border-bottom:1px solid #2f3850}
+.visit td:last-child{text-align:right}
+.visit address{font-style:normal;margin-top:24px;font-size:1.15rem;line-height:1.6}
+.visit a{color:var(--white)}
+@media (max-width:700px){.visit .wrap{grid-template-columns:1fr}}
+
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero-img{width:100%;aspect-ratio:4/5;object-fit:cover;border:3px solid var(--white)}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero-img{aspect-ratio:16/10}}
+.gallery{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-top:32px}
+.gallery img{width:100%;height:100%;min-height:260px;object-fit:cover;display:block;border:3px solid var(--ink)}
+@media (max-width:700px){.gallery{grid-template-columns:1fr 1fr}.gallery img:first-child{grid-column:1/-1}}
+.gallery-note{color:var(--muted);max-width:56ch;margin:14px 0 0}
+footer{padding:26px 0;color:var(--muted);font-size:.92rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+footer a{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="pole" aria-hidden="true"></div>
+<header>
+  <div class="wrap">
+    <a class="logo" href="#">Northside Barbers</a>
+    <nav aria-label="Main">
+      <a href="#book">Book</a><a href="#shop">The shop</a><a href="#prices">Prices</a><a href="#visit">Hours and address</a>
+      <a class="tel" href="tel:+15550107788">555 010 7788</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Book a chair in under a minute</h1>
+      <p>Pick a service, a barber and a time. No account and no deposit. We hold your chair for ten minutes.</p>
+    </div>
+    <img class="hero-img" src="https://images.unsplash.com/photo-1759134198561-e2041049419c?auto=format&fit=crop&w=900&q=75" alt="Barbers cutting hair in the shop">
+  </div>
+</section>
+
+<section class="book wrap" id="book" aria-label="Booking">
+  <div class="sheet">
+    <div class="flow">
+      <ol class="progress" id="progress"></ol>
+      <div id="step" aria-live="polite"></div>
+    </div>
+    <aside class="summary" aria-label="Your booking">
+      <h3>Your booking</h3>
+      <dl id="summary"></dl>
+      <div class="sum"><span>Total</span><span id="total">$0</span></div>
+    </aside>
+  </div>
+</section>
+
+<section class="band wrap" id="shop">
+  <h2>Inside the shop</h2>
+  <p class="gallery-note">Four chairs, hot towels and coffee while you wait. Walk-ins are welcome when a chair is free.</p>
+  <div class="gallery">
+    <img src="https://images.unsplash.com/photo-1781455793310-8427c96454c7?auto=format&fit=crop&w=1200&q=75" alt="Barbershop interior with chairs and mirrors" loading="lazy">
+    <img src="https://images.unsplash.com/photo-1775494165568-42c0fbb4c782?auto=format&fit=crop&w=700&q=75" alt="Vintage barber chair in sunlight" loading="lazy">
+    <img src="https://images.unsplash.com/photo-1759142449398-89357aa1bb36?auto=format&fit=crop&w=700&q=75" alt="Barbershop wall with vintage posters" loading="lazy">
+  </div>
+</section>
+
+<section class="band wrap" id="prices">
+  <h2>Prices</h2>
+  <div class="prices" id="priceList"></div>
+</section>
+
+<section class="band visit" id="visit">
+  <div class="wrap">
+    <div>
+      <h2>Hours</h2>
+      <table>
+        <tr><td>Monday to Friday</td><td>9:00 to 19:00</td></tr>
+        <tr><td>Saturday</td><td>9:00 to 17:00</td></tr>
+        <tr><td>Sunday</td><td>Closed</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>Find us</h2>
+      <address>14 Mill Lane, Northside<br>Two minutes from the tram stop<br><a href="tel:+15550107788">555 010 7788</a></address>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Northside Barbers is a fictional shop. This site is a portfolio demo and stores no data. Photos: Unsplash.</span>
+    <span>Design and code by <a href="https://gudrat97.github.io">Gudrat</a></span>
+  </div>
+</footer>
+
+<script>
+const services = [
+  {id:"cut", name:"Haircut", note:"Wash, cut and style", mins:40, price:28},
+  {id:"fade", name:"Skin fade", note:"Clipper fade with a blended top", mins:50, price:34},
+  {id:"beard", name:"Beard trim", note:"Shape, line and hot towel", mins:25, price:18},
+  {id:"combo", name:"Haircut and beard", note:"Our most booked service", mins:65, price:42},
+  {id:"shave", name:"Hot towel shave", note:"Straight razor, two passes", mins:35, price:26},
+  {id:"kids", name:"Kids cut", note:"Ages 12 and under", mins:30, price:18}
+];
+const barbers = [
+  {id:"any", name:"Any barber", note:"First free chair"},
+  {id:"leo", name:"Leo", note:"Fades and short crops"},
+  {id:"sam", name:"Sam", note:"Classic cuts and shaves"},
+  {id:"ivo", name:"Ivo", note:"Beards and longer hair"}
+];
+const steps = ["Service","Barber","Day and time","Your details"];
+const pick = {service:null, barber:null, day:null, time:null, name:"", phone:""};
+let step = 0, done = false;
+const $ = id => document.getElementById(id);
+
+// Next 14 days. The shop is closed on Sundays.
+const days = Array.from({length:14}, (_, i) => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + i); return d; });
+const dayName = d => d.toLocaleDateString("en-US", {weekday:"short"});
+const longDay = d => d.toLocaleDateString("en-US", {weekday:"long", month:"long", day:"numeric"});
+function slotsFor(d){
+  const close = d.getDay() === 6 ? 17 : 19, out = [];
+  for(let h = 9; h < close; h++) for(const m of [0, 30]){
+    // demo rule that marks some times as already taken, stable per day and barber
+    const n = d.getDate() * 7 + h * 3 + m / 30 + (pick.barber ? pick.barber.id.length * 5 : 0);
+    const past = d.getTime() === days[0].getTime() && (h < new Date().getHours() + 1);
+    out.push({label: h + ":" + (m ? "30" : "00"), taken: n % 4 === 0 || n % 7 === 0 || past});
+  }
+  return out;
+}
+
+$("priceList").innerHTML = services.map(s => `<div><span>${s.name}<small>${s.mins} min</small></span><b>$${s.price}</b></div>`).join("");
+
+function ready(){
+  return [pick.service, pick.barber, pick.day && pick.time, true][step];
+}
+function draw(){
+  $("progress").innerHTML = steps.map((s, i) => `<li class="${done || i < step ? "done" : i === step ? "now" : ""}" ${i === step && !done ? 'aria-current="step"' : ""}>${i + 1}<span>. ${s}</span></li>`).join("");
+  const el = $("step");
+  if(done){
+    el.innerHTML = `<div class="confirm"><div class="tick" aria-hidden="true">&#10003;</div><h2>You are booked, ${pick.name.split(" ")[0]}</h2>
+      <p>${pick.service.name} with ${pick.barber.id === "any" ? "the first free barber" : pick.barber.name} on ${longDay(pick.day)} at ${pick.time}. This is a demo, so no booking was sent.</p>
+      <div class="actions"><span></span><button class="btn" id="again">Book another</button></div></div>`;
+    $("again").onclick = () => { Object.assign(pick, {service:null, barber:null, day:null, time:null, name:"", phone:""}); step = 0; done = false; draw(); };
+    summary(); return;
+  }
+  let body = "";
+  if(step === 0) body = `<h2>Choose a service</h2><div class="opts">` + services.map(s =>
+    `<button class="opt" data-service="${s.id}" aria-pressed="${pick.service === s}"><b>${s.name}</b><span class="p">$${s.price}</span><small>${s.note}, ${s.mins} min</small></button>`).join("") + `</div>`;
+  if(step === 1) body = `<h2>Choose a barber</h2><div class="opts two">` + barbers.map(b =>
+    `<button class="opt" data-barber="${b.id}" aria-pressed="${pick.barber === b}"><b>${b.name}</b><small>${b.note}</small></button>`).join("") + `</div>`;
+  if(step === 2){
+    body = `<h2>Choose a day and time</h2><div class="days">` + days.map((d, i) =>
+      `<button class="day" data-day="${i}" ${d.getDay() === 0 ? "disabled" : ""} aria-pressed="${pick.day === d}" aria-label="${longDay(d)}${d.getDay() === 0 ? ", closed" : ""}"><small>${dayName(d)}</small><b>${d.getDate()}</b></button>`).join("") + `</div>`;
+    if(pick.day){
+      const list = slotsFor(pick.day);
+      body += list.some(s => !s.taken)
+        ? `<div class="slots">` + list.map(s => `<button class="slot" data-time="${s.label}" ${s.taken ? "disabled" : ""} aria-pressed="${pick.time === s.label}">${s.label}</button>`).join("") + `</div><p class="hint">Crossed-out times are already booked.</p>`
+        : `<p class="hint">No free times left on this day. Choose another day.</p>`;
+    } else body += `<p class="hint">Choose a day to see free times. We are closed on Sundays.</p>`;
+  }
+  if(step === 3) body = `<h2>Your details</h2>
+    <label class="f">Name<input id="name" autocomplete="name" value="${pick.name.replace(/"/g, "&quot;")}"><span class="err" id="nameErr"></span></label>
+    <label class="f">Mobile number<input id="phone" type="tel" autocomplete="tel" inputmode="tel" value="${pick.phone.replace(/"/g, "&quot;")}"><span class="err" id="phoneErr"></span></label>
+    <p class="hint">We text you a reminder two hours before. Your number is used for nothing else.</p>`;
+  el.innerHTML = body + `<div class="actions">${step ? '<button class="btn back" id="back">Back</button>' : "<span></span>"}
+    <button class="btn" id="next" ${ready() ? "" : "disabled"}>${step === 3 ? "Confirm booking" : "Continue"}</button></div>`;
+  if($("back")) $("back").onclick = () => { step--; draw(); };
+  $("next").onclick = next;
+  summary();
+}
+function summary(){
+  const row = (k, v) => `<dt>${k}</dt><dd>${v || "Not chosen yet"}</dd>`;
+  $("summary").innerHTML = row("Service", pick.service && pick.service.name + ", " + pick.service.mins + " min") +
+    row("Barber", pick.barber && pick.barber.name) +
+    row("When", pick.day && pick.time && longDay(pick.day) + " at " + pick.time);
+  $("total").textContent = "$" + (pick.service ? pick.service.price : 0);
+}
+function next(){
+  if(step < 3){ step++; draw(); return; }
+  pick.name = $("name").value.trim(); pick.phone = $("phone").value.trim();
+  const nameOk = pick.name.length >= 2, phoneOk = pick.phone.replace(/\D/g, "").length >= 7;
+  $("name").setAttribute("aria-invalid", !nameOk); $("phone").setAttribute("aria-invalid", !phoneOk);
+  $("nameErr").textContent = nameOk ? "" : "Enter your name so the barber knows who to call.";
+  $("phoneErr").textContent = phoneOk ? "" : "Enter a phone number with at least 7 digits.";
+  if(!nameOk){ $("name").focus(); return; }
+  if(!phoneOk){ $("phone").focus(); return; }
+  done = true; draw();
+}
+$("step").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b || b.disabled) return;
+  const d = b.dataset;
+  if(d.service) pick.service = services.find(s => s.id === d.service);
+  else if(d.barber){ pick.barber = barbers.find(x => x.id === d.barber); pick.time = null; }
+  else if(d.day){ pick.day = days[d.day]; pick.time = null; }
+  else if(d.time) pick.time = d.time;
+  else return;
+  // redraw, then put keyboard focus back on the option that was chosen
+  const key = Object.keys(d)[0], val = d[key];
+  draw();
+  const again = $("step").querySelector(`[data-${key}="${val}"]`);
+  if(again) again.focus({preventScroll:true});
+});
+draw();
+</script>
+<a href="../../" style="position:fixed;left:14px;bottom:14px;z-index:60;background:#0E1116;color:#fff;font:600 14px/1 system-ui,-apple-system,sans-serif;padding:10px 14px;border-radius:999px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25)">&larr; Back to portfolio</a>
+</body>
+</html>
